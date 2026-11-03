@@ -7,6 +7,12 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Парковка">
+    
+    <!-- Иконки для рабочего стола (Android, iOS, PC) -->
+    <link rel="icon" type="image/png" href="logo-gradient.png">
+    <link rel="apple-touch-icon" href="logo-gradient.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -276,9 +282,10 @@
             "background_color": "#0f172a",
             "theme_color": "#0f172a",
             "icons": [{
-                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzAwNTJhNSIgc3Ryb2tlPSIjZTMwMDBmIiBzdHJva2Utd2lkdGg9IjEwIi8+PHJlY3QgeD0iNDYiIHk9IjI1IiB3aWR0aD0iOCIgaGVpZ2h0PSI1MCIgZmlsbD0id2hpdGUiLz48bGluZSB4MT0iMjUiIHkxPSIyNSIgeDI9Ijc1IiB5Mj0iNzUiIHN0cm9rZT0iI2UzMDAwZiIgc3Ryb2tlLXdpZHRoPSIxMCIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIvPjwvc3ZnPg==",
-                "sizes": "512x512",
-                "type": "image/svg+xml"
+                "src": "logo-gradient.png",
+                "sizes": "192x192 512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
             }]
         };
         const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
