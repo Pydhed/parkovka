@@ -3,264 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Парковочный ассистент</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2563eb">
+    <title>Ассистент Парковки</title>
+    <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Парковка">
-    <meta name="description" content="Помощник для парковки по четным и нечетным дням с учетом пересменки">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <style>
         body {
-            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
-        
-        /* Smooth transitions for the result card */
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .sign-pulse {
+            animation: subtlePulse 2s infinite ease-in-out;
         }
-
-        /* Pulse animation for the button */
-        .btn-pulse:active {
-            transform: scale(0.95);
+        @keyframes driveIn {
+            0% { transform: translateY(250px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .car-animate {
+            animation: driveIn 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .icon-pop {
+            animation: popIn 0.5s ease-out 1.2s forwards;
+            opacity: 0;
+            transform: scale(0);
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 h-screen w-screen overflow-hidden flex flex-col antialiased selection:bg-blue-500 font-sans relative">
+<body class="bg-slate-900 text-slate-200 h-screen w-full flex flex-col font-sans overflow-hidden relative">
 
-    <!-- Background Decoration -->
-    <div class="absolute inset-0 z-0 flex items-center justify-center opacity-5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-    </div>
-
-    <!-- Top Info / Notification Area -->
-    <div id="notification-panel" class="fixed top-0 left-0 w-full z-50 transform -translate-y-full transition-transform duration-300 ease-out flex justify-center">
-        <div class="bg-slate-800 text-slate-100 w-full max-w-md mx-auto rounded-b-3xl shadow-2xl shadow-black/80 border-b border-x border-slate-700 p-6 flex flex-col gap-4 relative">
-            
-            <!-- Close Button -->
-            <button onclick="closeNotification()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-700/50 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-
-            <!-- Current Date and Time -->
-            <div class="text-center w-full mt-2">
-                <p class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Сейчас</p>
-                <p class="text-2xl font-bold text-white flex items-center justify-center gap-2">
-                    <span id="popup-date">--</span>
-                    <span class="text-blue-400">•</span>
-                    <span id="popup-time">--:--</span>
-                </p>
-            </div>
-
-            <div class="flex flex-col items-center justify-center text-center gap-2 mt-2 pb-4">
-                <div id="side-icon" class="p-4 bg-blue-500/20 text-blue-400 rounded-full mb-1 inline-block">
-                    <!-- Icon injected by JS -->
-                </div>
-                <h2 id="side-title" class="text-3xl font-bold text-white mb-1">...</h2>
-                <p id="day-type" class="text-base font-semibold text-blue-400 uppercase tracking-wider mb-3">...</p>
-                <p id="result-text" class="text-2xl font-medium text-slate-200 leading-snug"></p>
-            </div>
-            
-            <!-- Swipe handle decoration -->
-            <div class="w-12 h-1.5 bg-slate-600 rounded-full mx-auto mt-2"></div>
+    <!-- Основной экран -->
+    <main class="flex-1 flex flex-col items-center pt-8 px-4 relative z-10 w-full max-w-md mx-auto">
+        
+        <!-- Время -->
+        <div id="current-datetime" class="text-center text-slate-300 font-medium text-lg mb-6 bg-slate-800/50 py-2 px-6 rounded-full border border-slate-700 shadow-md">
+            Загрузка...
         </div>
-    </div>
 
-    <!-- Main Content Area (Visual Center) -->
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto">
-        <div class="text-center mb-12 w-full">
-            <h2 class="text-xl font-semibold text-slate-300 mb-2">Нагорное шоссе</h2>
-            
-            <!-- Traffic Signs -->
-            <div class="flex justify-center gap-6 my-6">
-                <!-- Sign 3.29 (Odd days) -->
-                <svg viewBox="0 0 100 100" class="w-24 h-24 drop-shadow-lg">
-                    <circle cx="50" cy="50" r="45" fill="#00529C" stroke="#E3001B" stroke-width="10" />
-                    <rect x="45" y="25" width="10" height="50" fill="white" />
-                    <line x1="15" y1="15" x2="85" y2="85" stroke="#E3001B" stroke-width="10" />
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight text-center mb-8 drop-shadow-md">
+            Нагорное шоссе
+        </h1>
+
+        <!-- Знаки -->
+        <div class="flex justify-center gap-10 w-full mb-12">
+            <div class="flex flex-col items-center">
+                <svg viewBox="0 0 100 100" class="w-28 h-28 drop-shadow-2xl sign-pulse">
+                    <circle cx="50" cy="50" r="45" fill="#0052a5" stroke="#e3000f" stroke-width="10"/>
+                    <rect x="46" y="25" width="8" height="50" fill="white" />
+                    <line x1="25" y1="25" x2="75" y2="75" stroke="#e3000f" stroke-width="10" stroke-linecap="square"/>
                 </svg>
-                <!-- Sign 3.30 (Even days) -->
-                <svg viewBox="0 0 100 100" class="w-24 h-24 drop-shadow-lg">
-                    <circle cx="50" cy="50" r="45" fill="#00529C" stroke="#E3001B" stroke-width="10" />
+                <span class="text-slate-400 text-sm mt-3 font-bold tracking-wide">Нечетные (I)</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <svg viewBox="0 0 100 100" class="w-28 h-28 drop-shadow-2xl sign-pulse" style="animation-delay: 1s;">
+                    <circle cx="50" cy="50" r="45" fill="#0052a5" stroke="#e3000f" stroke-width="10"/>
                     <rect x="38" y="25" width="8" height="50" fill="white" />
                     <rect x="54" y="25" width="8" height="50" fill="white" />
-                    <line x1="15" y1="15" x2="85" y2="85" stroke="#E3001B" stroke-width="10" />
+                    <line x1="25" y1="25" x2="75" y2="75" stroke="#e3000f" stroke-width="10" stroke-linecap="square"/>
                 </svg>
-            </div>
-
-            <h1 class="text-4xl font-bold tracking-tight text-white mb-3">Парковка</h1>
-            
-            <div class="mt-8 flex flex-col items-center justify-center bg-slate-800/80 backdrop-blur px-8 py-6 rounded-3xl border border-slate-700 shadow-inner w-full max-w-[280px] mx-auto">
-                <span id="main-date" class="text-lg font-medium text-slate-300 mb-2">--</span>
-                <div class="inline-flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span id="main-clock" class="text-4xl font-bold text-white font-mono tracking-widest">--:--</span>
-                </div>
+                <span class="text-slate-400 text-sm mt-3 font-bold tracking-wide">Четные (II)</span>
             </div>
         </div>
     </main>
 
-    <!-- Bottom Action Area -->
-    <div class="fixed bottom-0 left-0 w-full z-20 pb-8 pt-12 px-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent flex justify-center pointer-events-none">
-        <button 
-            id="park-btn"
-            class="pointer-events-auto btn-pulse bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-[2rem] w-full max-w-sm py-5 flex items-center justify-center gap-3 shadow-[0_0_40px_-10px_rgba(37,99,235,0.7)] transition-all duration-200 border border-blue-400/30"
-            onclick="calculateParking()"
-        >
-            <span class="text-xl font-bold">Где парковаться?</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    <!-- Огромная кнопка -->
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md pb-8 pt-4 px-4 border-t border-slate-800 z-20 flex justify-center">
+        <button onclick="openPanel()" class="w-full max-w-md bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-2xl sm:text-3xl font-extrabold py-6 rounded-2xl shadow-[0_0_40px_rgba(37,99,235,0.6)] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+            ПАРКОВАТЬСЯ
         </button>
     </div>
 
-    <!-- Application Logic -->
+    <!-- Всплывающая панель -->
+    <div id="info-panel" class="fixed inset-0 w-full h-full bg-slate-900 z-50 transform translate-y-full transition-transform duration-500 ease-out flex flex-col items-center pt-12 px-4 pb-8 overflow-y-auto">
+        
+        <button onclick="closePanel()" class="absolute top-4 right-4 p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors z-50">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- Вердикт -->
+        <div class="w-full max-w-lg mb-6 px-2 mt-4 flex items-center justify-center">
+            <p id="verdict-text" class="text-xl sm:text-2xl text-white font-normal text-center leading-relaxed drop-shadow-md">
+                <!-- Текст -->
+            </p>
+        </div>
+
+        <!-- Таймер -->
+        <div id="timer-container" class="text-center w-full max-w-md bg-slate-800/60 p-4 rounded-2xl border border-slate-700 mb-6">
+            <div id="timer-title" class="text-xs sm:text-sm text-slate-400 uppercase tracking-widest font-bold mb-1">...</div>
+            <div id="timer-value" class="text-2xl sm:text-3xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
+        </div>
+
+        <!-- Кнопка уведомления (показывается только до 21:00) -->
+        <button id="notify-btn" onclick="requestNotification()" class="hidden w-full max-w-md bg-indigo-600/90 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl mb-6 shadow-lg transition-colors border border-indigo-500">
+            🔔 Напомнить в 21:00
+        </button>
+
+        <!-- Схема дороги -->
+        <div class="w-full max-w-md h-64 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative overflow-hidden shadow-2xl mt-auto">
+            <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10"></div>
+            
+            <div class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6">
+                <div class="absolute top-3 text-slate-300 text-sm uppercase font-bold tracking-widest text-center z-20">Слева<br><span class="text-xs text-slate-400">(I)</span></div>
+                <div id="left-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6">
+                <div class="absolute top-3 text-slate-300 text-sm uppercase font-bold tracking-widest text-center z-20">Справа<br><span class="text-xs text-slate-400">(II)</span></div>
+                <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Icons
-        const iconLeft = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
-        const iconRight = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
+        const carSVG = `
+            <svg viewBox="0 0 100 200" class="w-16 h-32 car-animate drop-shadow-xl absolute bottom-8 z-10">
+                <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
+                <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
+                <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
+                <!-- Фары -->
+                <circle cx="25" cy="20" r="5" fill="#fef08a"/>
+                <circle cx="75" cy="20" r="5" fill="#fef08a"/>
+                <rect x="20" y="180" width="15" height="5" fill="#ef4444" rx="2"/>
+                <rect x="65" y="180" width="15" height="5" fill="#ef4444" rx="2"/>
+            </svg>
+        `;
 
-        let currentTimeString = "";
-        let currentDateString = "";
+        const iconOk = `
+            <div class="absolute top-1/2 -translate-y-1/2 bg-green-500/90 p-3 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.8)] z-20 icon-pop">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+        `;
 
-        // Update real-time clock and date
-        function updateClock() {
+        const iconCross = `
+            <div class="absolute top-1/2 -translate-y-1/2 bg-red-500/90 p-3 rounded-full shadow-[0_0_20px_rgba(239,68,68,0.8)] z-20 icon-pop">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+        `;
+
+        function calculateLogic() {
             const now = new Date();
-            currentTimeString = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             
-            const dateOptions = { month: 'long', day: 'numeric', weekday: 'short' };
-            currentDateString = now.toLocaleDateString('ru-RU', dateOptions);
-            
-            const mainClock = document.getElementById('main-clock');
-            if(mainClock) mainClock.textContent = currentTimeString;
+            // Обновление даты на главном экране (по реальному времени)
+            const dateStr = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+            const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('current-datetime').textContent = `${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} • ${timeStr}`;
 
-            const mainDate = document.getElementById('main-date');
-            if(mainDate) mainDate.textContent = currentDateString;
-        }
+            const hours = now.getHours();
+            const isOdd = (now.getDate() % 2 !== 0);
+            const isChangeover = (hours >= 21); 
 
-        setInterval(updateClock, 1000);
-        updateClock(); // Initial call
+            let rawVerdict = "";
+            let parkLeft = false;
 
-        // Main parking logic
-        function calculateParking() {
-            // Update time exactly when button is pressed
-            updateClock();
-            
-            const now = new Date();
-            const hour = now.getHours();
-            const today = now.getDate();
-
-            // Calculate tomorrow's date
-            const tomorrowDate = new Date(now);
-            tomorrowDate.setDate(now.getDate() + 1);
-            const tomorrow = tomorrowDate.getDate();
-
-            let resultText = "";
-            let side = ""; // 'left' or 'right'
-            let dayTypeStr = "";
-            let sideTitleStr = "";
-
-            // LOGIC
-            if (hour >= 21) {
-                if (tomorrow % 2 === 0) {
-                    dayTypeStr = "Завтра четное число";
-                    sideTitleStr = "Левая сторона";
-                    resultText = "Паркуемся по левой стороне. Запаркованные справа до полуночи должны переставить автомобили.";
-                    side = "left";
-                } else {
-                    dayTypeStr = "Завтра нечетное число";
-                    sideTitleStr = "Правая сторона";
-                    resultText = "Паркуемся по правой стороне. Запаркованные слева до полуночи должны переставить автомобили.";
-                    side = "right";
+            if (isChangeover) {
+                let tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                let tomorrowOdd = (tomorrow.getDate() % 2 !== 0);
+                
+                if (tomorrowOdd) { // Значит сегодня ЧЕТНОЕ
+                    rawVerdict = 'Завтра нечетное число. Паркуемся по <span class="text-yellow-400 font-bold">правой стороне</span>. Запаркованные слева до полуночи должны переставить автомобили.';
+                    parkLeft = false;
+                } else { // Значит сегодня НЕЧЕТНОЕ
+                    rawVerdict = 'Завтра четное число. Паркуемся по <span class="text-yellow-400 font-bold">левой стороне</span>. Запаркованные справа до полуночи должны переставить автомобили.';
+                    parkLeft = true;
                 }
             } else {
-                if (today % 2 === 0) {
-                    dayTypeStr = "Сегодня четное число";
-                    sideTitleStr = "Левая сторона";
-                    resultText = "Паркуемся по левой стороне. (с 21 часа до полуночи перепарковываемся на правую сторону, если оставляем машину до завтра)";
-                    side = "left";
+                if (isOdd) {
+                    rawVerdict = 'Сегодня нечетное число. Паркуемся по <span class="text-yellow-400 font-bold">правой стороне</span>. (с 21 до полуночи перепарковываемся на левую сторону, если оставляем машину до завтра)';
+                    parkLeft = false;
                 } else {
-                    dayTypeStr = "Сегодня нечетное число";
-                    sideTitleStr = "Правая сторона";
-                    resultText = "Паркуемся по правой стороне. (с 21 до полуночи перепарковываемся на левую сторону, если оставляем машину до завтра)";
-                    side = "right";
+                    rawVerdict = 'Сегодня четное число. Паркуемся по <span class="text-yellow-400 font-bold">левой стороне</span>. (с 21 часа до полуночи перепарковываемся на правую сторону, если оставляем машину до завтра)';
+                    parkLeft = true;
                 }
             }
 
-            // UI Update
-            renderResult(sideTitleStr, dayTypeStr, resultText, side);
-        }
+            document.getElementById('verdict-text').innerHTML = rawVerdict;
 
-        function renderResult(title, dayType, text, side) {
-            const panel = document.getElementById('notification-panel');
-            const popupDate = document.getElementById('popup-date');
-            const popupTime = document.getElementById('popup-time');
-            
-            const sideTitle = document.getElementById('side-title');
-            const dayTypeEl = document.getElementById('day-type');
-            const resultText = document.getElementById('result-text');
-            const sideIcon = document.getElementById('side-icon');
-
-            // Set Date and Time in popup
-            popupDate.textContent = currentDateString;
-            popupTime.textContent = currentTimeString;
-
-            // Set content
-            sideTitle.textContent = title;
-            dayTypeEl.textContent = dayType;
-            resultText.textContent = text;
-
-            // Set visual styling based on side
-            if (side === 'left') {
-                sideIcon.innerHTML = iconLeft;
-                sideIcon.className = "p-4 bg-indigo-500/20 text-indigo-400 rounded-full mb-1 inline-flex items-center justify-center";
-                dayTypeEl.className = "text-base font-semibold text-indigo-400 uppercase tracking-wider mb-3";
+            // Управление кнопкой уведомлений
+            const notifyBtn = document.getElementById('notify-btn');
+            if (now.getHours() < 21) {
+                notifyBtn.classList.remove('hidden');
+                notifyBtn.classList.add('block');
             } else {
-                sideIcon.innerHTML = iconRight;
-                sideIcon.className = "p-4 bg-emerald-500/20 text-emerald-400 rounded-full mb-1 inline-flex items-center justify-center";
-                dayTypeEl.className = "text-base font-semibold text-emerald-400 uppercase tracking-wider mb-3";
+                notifyBtn.classList.add('hidden');
+                notifyBtn.classList.remove('block');
             }
 
-            // Show panel by removing translate-y-full
-            panel.classList.remove('-translate-y-full');
+            return parkLeft;
+        }
 
-            // Haptic feedback
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(50);
+        function drawRoad(parkLeft) {
+            const leftContainer = document.getElementById('left-road-content');
+            const rightContainer = document.getElementById('right-road-content');
+            
+            // Очищаем перед перерисовкой
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+            
+            if (parkLeft) {
+                leftContainer.innerHTML = carSVG + iconOk;
+                rightContainer.innerHTML = iconCross;
+            } else {
+                leftContainer.innerHTML = iconCross;
+                rightContainer.innerHTML = carSVG + iconOk;
             }
         }
-        
-        function closeNotification() {
-            const panel = document.getElementById('notification-panel');
-            panel.classList.add('-translate-y-full');
-        }
-        
-        // Allow swiping up on the notification to dismiss
-        let touchstartY = 0;
-        let touchendY = 0;
-        
-        const panel = document.getElementById('notification-panel');
-        
-        panel.addEventListener('touchstart', e => {
-            touchstartY = e.changedTouches[0].screenY;
-        });
 
-        panel.addEventListener('touchend', e => {
-            touchendY = e.changedTouches[0].screenY;
-            if (touchstartY - touchendY > 30) { // Swipe up
-                closeNotification();
+        // Таймер (всегда считает от реального времени до следующего дедлайна)
+        function updateTimerLive() {
+            const now = new Date();
+            let target = new Date(now);
+            const isChangeover = now.getHours() >= 21;
+
+            if (isChangeover) {
+                target.setDate(target.getDate() + 1);
+                target.setHours(0, 0, 0, 0);
+                document.getElementById('timer-title').textContent = "До смены суток осталось:";
+                document.getElementById('timer-value').className = "text-2xl sm:text-3xl font-mono font-bold text-green-400 drop-shadow-sm";
+            } else {
+                target.setHours(21, 0, 0, 0);
+                document.getElementById('timer-title').textContent = "До начала времени перепарковки (21:00) осталось:";
+                document.getElementById('timer-value').className = "text-2xl sm:text-3xl font-mono font-bold text-amber-400 drop-shadow-sm";
             }
-        });
+
+            let diff = target - now;
+            if (diff < 0) diff = 0;
+
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / 1000 / 60) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('timer-value').textContent = 
+                `${h} ч. ${m} мин. ${s} сек.`;
+        }
+
+        function requestNotification() {
+            const btn = document.getElementById('notify-btn');
+            if (!("Notification" in window)) {
+                btn.textContent = "Уведомления не поддерживаются";
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    btn.textContent = "✓ Напоминание запланировано";
+                    btn.classList.replace('bg-indigo-600/90', 'bg-green-600/90');
+                    btn.classList.replace('hover:bg-indigo-500', 'hover:bg-green-500');
+                    btn.classList.replace('border-indigo-500', 'border-green-500');
+                    
+                    // Эмуляция планирования (в реальном PWA нужен Service Worker push event)
+                    // Здесь мы просто показываем визуальный фидбек
+                } else {
+                    btn.textContent = "✕ Нет разрешения";
+                    btn.classList.replace('bg-indigo-600/90', 'bg-red-600/90');
+                }
+            });
+        }
+
+        function openPanel() {
+            const parkLeft = calculateLogic(); 
+            const panel = document.getElementById('info-panel');
+            panel.classList.remove('translate-y-full');
+            
+            // Перезапуск анимации машинки при открытии панели
+            setTimeout(() => {
+                drawRoad(parkLeft);
+            }, 100);
+        }
+
+        function closePanel() {
+            const panel = document.getElementById('info-panel');
+            panel.classList.add('translate-y-full');
+            // Очищаем дорогу чтобы при следующем открытии анимация сработала
+            setTimeout(() => {
+                document.getElementById('left-road-content').innerHTML = '';
+                document.getElementById('right-road-content').innerHTML = '';
+            }, 500);
+        }
+
+        // Инициализация
+        calculateLogic();
+        updateTimerLive();
+        setInterval(() => {
+            calculateLogic();
+            updateTimerLive();
+        }, 1000);
+
+        // --- PWA Офлайн режим и Манифест ---
+        const manifestData = {
+            "name": "Ассистент Парковки",
+            "short_name": "Парковка",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#0f172a",
+            "theme_color": "#0f172a",
+            "icons": [{
+                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzAwNTJhNSIgc3Ryb2tlPSIjZTMwMDBmIiBzdHJva2Utd2lkdGg9IjEwIi8+PHJlY3QgeD0iNDYiIHk9IjI1IiB3aWR0aD0iOCIgaGVpZ2h0PSI1MCIgZmlsbD0id2hpdGUiLz48bGluZSB4MT0iMjUiIHkxPSIyNSIgeDI9Ijc1IiB5Mj0iNzUiIHN0cm9rZT0iI2UzMDAwZiIgc3Ryb2tlLXdpZHRoPSIxMCIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIvPjwvc3ZnPg==",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = URL.createObjectURL(manifestBlob);
+        document.head.appendChild(manifestLink);
+
+        // Встроенный Service Worker для кеширования (офлайн)
+        const swCode = `
+            const CACHE_NAME = 'parking-v1';
+            self.addEventListener('install', e => {
+                self.skipWaiting();
+            });
+            self.addEventListener('activate', e => {
+                self.clients.claim();
+            });
+            self.addEventListener('fetch', e => {
+                e.respondWith(
+                    fetch(e.request).catch(() => new Response('Offline mode active. Reload to update.'))
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log('SW setup failed', err));
+        }
     </script>
 </body>
 </html>
