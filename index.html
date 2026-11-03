@@ -64,8 +64,6 @@
                 </p>
             </div>
 
-            <hr class="border-slate-700">
-
             <div class="flex flex-col items-center justify-center text-center gap-2 mt-2 pb-4">
                 <div id="side-icon" class="p-4 bg-blue-500/20 text-blue-400 rounded-full mb-1 inline-block">
                     <!-- Icon injected by JS -->
@@ -83,8 +81,26 @@
     <!-- Main Content Area (Visual Center) -->
     <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto">
         <div class="text-center mb-12 w-full">
+            <h2 class="text-xl font-semibold text-slate-300 mb-2">Нагорное шоссе</h2>
+            
+            <!-- Traffic Signs -->
+            <div class="flex justify-center gap-6 my-6">
+                <!-- Sign 3.29 (Odd days) -->
+                <svg viewBox="0 0 100 100" class="w-24 h-24 drop-shadow-lg">
+                    <circle cx="50" cy="50" r="45" fill="#00529C" stroke="#E3001B" stroke-width="10" />
+                    <rect x="45" y="25" width="10" height="50" fill="white" />
+                    <line x1="15" y1="15" x2="85" y2="85" stroke="#E3001B" stroke-width="10" />
+                </svg>
+                <!-- Sign 3.30 (Even days) -->
+                <svg viewBox="0 0 100 100" class="w-24 h-24 drop-shadow-lg">
+                    <circle cx="50" cy="50" r="45" fill="#00529C" stroke="#E3001B" stroke-width="10" />
+                    <rect x="38" y="25" width="8" height="50" fill="white" />
+                    <rect x="54" y="25" width="8" height="50" fill="white" />
+                    <line x1="15" y1="15" x2="85" y2="85" stroke="#E3001B" stroke-width="10" />
+                </svg>
+            </div>
+
             <h1 class="text-4xl font-bold tracking-tight text-white mb-3">Парковка</h1>
-            <p class="text-slate-400 text-base">Ассистент по знакам 3.29 и 3.30</p>
             
             <div class="mt-8 flex flex-col items-center justify-center bg-slate-800/80 backdrop-blur px-8 py-6 rounded-3xl border border-slate-700 shadow-inner w-full max-w-[280px] mx-auto">
                 <span id="main-date" class="text-lg font-medium text-slate-300 mb-2">--</span>
