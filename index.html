@@ -105,11 +105,6 @@
             <div id="timer-value" class="text-2xl sm:text-3xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
         </div>
 
-        <!-- Кнопка уведомления (показывается только до 21:00) -->
-        <button id="notify-btn" onclick="requestNotification()" class="hidden w-full max-w-md bg-indigo-600/90 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl mb-6 shadow-lg transition-colors border border-indigo-500">
-            🔔 Напомнить в 21:00
-        </button>
-
         <!-- Схема дороги -->
         <div class="w-full max-w-md h-64 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative overflow-hidden shadow-2xl mt-auto">
             <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10"></div>
@@ -195,16 +190,6 @@
 
             document.getElementById('verdict-text').innerHTML = rawVerdict;
 
-            // Управление кнопкой уведомлений
-            const notifyBtn = document.getElementById('notify-btn');
-            if (now.getHours() < 21) {
-                notifyBtn.classList.remove('hidden');
-                notifyBtn.classList.add('block');
-            } else {
-                notifyBtn.classList.add('hidden');
-                notifyBtn.classList.remove('block');
-            }
-
             return parkLeft;
         }
 
@@ -251,28 +236,6 @@
 
             document.getElementById('timer-value').textContent = 
                 `${h} ч. ${m} мин. ${s} сек.`;
-        }
-
-        function requestNotification() {
-            const btn = document.getElementById('notify-btn');
-            if (!("Notification" in window)) {
-                btn.textContent = "Уведомления не поддерживаются";
-                return;
-            }
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    btn.textContent = "✓ Напоминание запланировано";
-                    btn.classList.replace('bg-indigo-600/90', 'bg-green-600/90');
-                    btn.classList.replace('hover:bg-indigo-500', 'hover:bg-green-500');
-                    btn.classList.replace('border-indigo-500', 'border-green-500');
-                    
-                    // Эмуляция планирования (в реальном PWA нужен Service Worker push event)
-                    // Здесь мы просто показываем визуальный фидбек
-                } else {
-                    btn.textContent = "✕ Нет разрешения";
-                    btn.classList.replace('bg-indigo-600/90', 'bg-red-600/90');
-                }
-            });
         }
 
         function openPanel() {
