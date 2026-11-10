@@ -60,17 +60,6 @@
             text-align: center;
             margin-bottom: 12px;
         }
-        .verdict {
-            width: 100%;
-            background: rgba(30,41,59,0.6);
-            border: 1px solid #334155;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
         .timer {
             width: 100%;
             background: rgba(30,41,59,0.6);
@@ -266,7 +255,6 @@
     <main class="app">
         <div id="current-datetime" class="datetime">Загрузка...</div>
         <h1>Нагорное шоссе</h1>
-        <div class="verdict"><p id="verdict-text"></p></div>
         <div class="timer">
             <div id="timer-title" class="timer-title">...</div>
             <div id="timer-value" class="timer-value">--:--:--</div>
@@ -392,15 +380,6 @@
             const midnightParkLeft = !tomorrowOdd;
             const mode = isChangeover ? 'strict' : 'relaxed';
 
-            let verdict = "";
-            if (mode === 'strict') {
-                verdict = midnightParkLeft
-                    ? 'Четное число → <span class="green">слева</span>'
-                    : 'Нечетное число → <span class="green">справа</span>';
-            } else {
-                verdict = 'До 21:00 — <span class="yellow">с обеих сторон</span>';
-            }
-            document.getElementById('verdict-text').innerHTML = verdict;
             return { mode, midnightParkLeft };
         }
 
@@ -430,11 +409,11 @@
             } else {
                 if (midnightParkLeft) {
                     leftC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
-                    rightC.innerHTML = badge('Убрать до 21:00','yellow') + createCar(2,0.3) + icons.warn;
+                    rightC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
                     leftL.classList.add('ok');
                     rightL.classList.add('warn');
                 } else {
-                    leftC.innerHTML = badge('Убрать до 21:00','yellow') + createCar(2,0.3) + icons.warn;
+                    leftC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
                     rightC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
                     rightL.classList.add('ok');
                     leftL.classList.add('warn');
