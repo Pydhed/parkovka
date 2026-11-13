@@ -291,24 +291,9 @@
             "background_color": "#0f172a",
             "theme_color": "#0f172a",
             "icons": [
-                {
-                    "src": "logo-gradient.png",
-                    "sizes": "192x192",
-                    "type": "image/png",
-                    "purpose": "any"
-                },
-                {
-                    "src": "logo-gradient.png",
-                    "sizes": "512x512",
-                    "type": "image/png",
-                    "purpose": "any"
-                },
-                {
-                    "src": "logo-gradient.png",
-                    "sizes": "512x512",
-                    "type": "image/png",
-                    "purpose": "maskable"
-                }
+                { "src": "logo-gradient.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+                { "src": "logo-gradient.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+                { "src": "logo-gradient.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
             ]
         };
         const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
@@ -373,17 +358,17 @@
             const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('current-datetime').textContent = `${dateStr} • ${timeStr}`;
 
+            const todayOdd = now.getDate() % 2 !== 0;
             const isChangeover = now.getHours() >= 21;
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowOdd = (tomorrow.getDate() % 2 !== 0);
-            const midnightParkLeft = !tomorrowOdd;
-            const mode = isChangeover ? 'strict' : 'relaxed';
-
-            return { mode, midnightParkLeft };
+            
+            // До 21:00 действует текущая дата, с 21:00 до 00:00 - следующая дата
+            const validLeft = isChangeover ? !todayOdd : todayOdd;
+            const validRight = !validLeft; // В стандартной схеме стороны взаимоисключающие
+            
+            return { validLeft, validRight, isChangeover };
         }
 
-        function drawRoad({ mode, midnightParkLeft }) {
+        function drawRoad({ validLeft, validRight, isChangeover }) {
             const leftC = document.getElementById('left-road-content');
             const rightC = document.getElementById('right-road-content');
             const leftL = document.getElementById('left-lane');
@@ -394,30 +379,29 @@
             leftL.className = 'lane';
             rightL.className = 'lane';
 
-            if (mode === 'strict') {
-                if (midnightParkLeft) {
-                    leftC.innerHTML = badge('Можно до 00:00','green') + createCar(1,0) + icons.ok;
-                    rightC.innerHTML = badge('Нельзя','red') + icons.bad;
-                    leftL.classList.add('ok');
-                    rightL.classList.add('disabled');
+            // Логика отображения: машинка рисуется ТОЛЬКО там, где парковка разрешена
+            if (validLeft) {
+                leftL.classList.add('ok');
+                if (isChangeover) {
+                    leftC.innerHTML = badge('Можно до 00:00', 'green') + createCar(1, 0) + icons.ok;
                 } else {
-                    leftC.innerHTML = badge('Нельзя','red') + icons.bad;
-                    rightC.innerHTML = badge('Можно до 00:00','green') + createCar(1,0) + icons.ok;
-                    rightL.classList.add('ok');
-                    leftL.classList.add('disabled');
+                    leftC.innerHTML = badge('Убрать с 21:00 до 00:00', 'yellow') + createCar(1, 0) + icons.warn;
                 }
             } else {
-                if (midnightParkLeft) {
-                    leftC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
-                    rightC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
-                    leftL.classList.add('ok');
-                    rightL.classList.add('warn');
+                leftL.classList.add('disabled');
+                leftC.innerHTML = badge('Нельзя', 'red') + icons.bad;
+            }
+
+            if (validRight) {
+                rightL.classList.add('ok');
+                if (isChangeover) {
+                    rightC.innerHTML = badge('Можно до 00:00', 'green') + createCar(2, 0) + icons.ok;
                 } else {
-                    leftC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
-                    rightC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
-                    rightL.classList.add('ok');
-                    leftL.classList.add('warn');
+                    rightC.innerHTML = badge('Убрать с 21:00 до 00:00', 'yellow') + createCar(2, 0) + icons.warn;
                 }
+            } else {
+                rightL.classList.add('disabled');
+                rightC.innerHTML = badge('Нельзя', 'red') + icons.bad;
             }
         }
 
@@ -446,14 +430,14 @@
             value.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
-        let lastMode = null, lastPark = null;
+        let lastValidLeft = null, lastIsChangeover = null;
         function tick() {
             const logic = calculateLogic();
             updateTimerLive();
-            if (lastMode !== logic.mode || lastPark !== logic.midnightParkLeft) {
+            if (lastValidLeft !== logic.validLeft || lastIsChangeover !== logic.isChangeover) {
                 drawRoad(logic);
-                lastMode = logic.mode;
-                lastPark = logic.midnightParkLeft;
+                lastValidLeft = logic.validLeft;
+                lastIsChangeover = logic.isChangeover;
             }
         }
 
