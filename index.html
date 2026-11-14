@@ -261,11 +261,11 @@
         <div class="road">
             <div class="divider"></div>
             <div id="left-lane" class="lane">
-                <div class="lane-label">Слева<small>(I, нечет)</small></div>
+                <div class="lane-label">Слева<small>(знак 3.29, можно в четные)</small></div>
                 <div id="left-road-content" class="content"></div>
             </div>
             <div id="right-lane" class="lane">
-                <div class="lane-label">Справа<small>(II, чет)</small></div>
+                <div class="lane-label">Справа<small>(знак 3.30, можно в нечетные)</small></div>
                 <div id="right-road-content" class="content"></div>
             </div>
         </div>
@@ -359,14 +359,17 @@
 
             const isChangeover = now.getHours() >= 21;
             const todayOdd = now.getDate() % 2 !== 0;
-            const tomorrowOdd = !todayOdd; // Следующий день всегда противоположной четности
-
-            // Левая сторона (I) для нечетных, Правая (II) для четных
-            const currentValidLeft = todayOdd;
-            const currentValidRight = !todayOdd;
             
-            const nextValidLeft = tomorrowOdd;
-            const nextValidRight = !tomorrowOdd;
+            // ИСПРАВЛЕННАЯ ЛОГИКА ПДД:
+            // Знак 3.29 (I, слева): запрещена в нечетные -> разрешена в ЧЕТНЫЕ (!todayOdd)
+            // Знак 3.30 (II, справа): запрещена в четные -> разрешена в НЕЧЕТНЫЕ (todayOdd)
+            
+            const currentValidLeft = !todayOdd;  // Левая активна в четные дни
+            const currentValidRight = todayOdd;  // Правая активна в нечетные дни
+            
+            // После 00:00 четность меняется на противоположную
+            const nextValidLeft = todayOdd;      // Левая станет активна в нечетные (завтра)
+            const nextValidRight = !todayOdd;    // Правая станет активна в четные (завтра)
 
             return { isChangeover, currentValidLeft, currentValidRight, nextValidLeft, nextValidRight };
         }
