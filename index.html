@@ -60,32 +60,9 @@
             text-align: center;
             margin-bottom: 12px;
         }
-        .timer {
-            width: 100%;
-            background: rgba(30,41,59,0.6);
-            border: 1px solid #334155;
-            padding: 8px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-        .timer-title {
-            font-size: 10px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 700;
-        }
-        .timer-value {
-            font-size: 24px;
-            font-family: ui-monospace, monospace;
-            font-weight: 700;
-            color: #fbbf24;
-        }
-        .timer-value.urgent { color: #f87171; }
         .road {
             width: 100%;
-            height: 384px;
+            height: 320px;
             background: #475569;
             border-radius: 24px;
             border: 4px solid #64748b;
@@ -115,60 +92,71 @@
             background: rgba(30,41,59,0.8);
             transition: all 0.5s;
             overflow: hidden;
+            padding-top: 10px;
         }
         .lane.ok { background: rgba(30,41,59,1); box-shadow: inset 0 4px 0 rgba(34,197,94,0.6); }
         .lane.warn { box-shadow: inset 0 4px 0 rgba(234,179,8,0.6); }
         .lane.disabled { opacity: 0.4; }
+        /* ПОДПИСЬ ТЕПЕРЬ В ПОТОКЕ — не наезжает ни при каком переносе */
         .lane-label {
-            position: absolute;
-            top: 8px;
+            position: static;
             color: #cbd5e1;
             font-size: 10px;
             text-transform: uppercase;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             text-align: center;
             z-index: 20;
+            margin-bottom: 6px;
+            line-height: 1.2;
         }
-        .lane-label small { font-size: 9px; color: #94a3b8; display: block; }
+        .lane-label small { font-size: 9px; color: #94a3b8; display: block; font-weight: 600; }
         .content {
             width: 100%;
-            height: 100%;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding-top: 24px;
+            justify-content: flex-start;
+            padding-top: 0;
         }
         .badge {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             background: rgba(15,23,42,0.9);
-            padding: 6px 12px;
+            padding: 6px 8px;
             border-radius: 6px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             animation: textSlideIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards;
             opacity: 0;
-            line-height: 1.3;
+            line-height: 1.25;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 92%;
+            word-break: break-word;
         }
         .badge.green { color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
         .badge.red { color: #f87171; border: 1px solid rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); }
         .badge.yellow { color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
-        .icon {
-            width: 24px;
-            height: 24px;
-            padding: 6px;
-            border-radius: 50%;
-            margin-top: 12px;
-            animation: iconBounce 0.7s cubic-bezier(0.68,-0.55,0.265,1.55) 1s forwards;
+        .lane-timer {
+            font-size: 14px;
+            font-family: ui-monospace, monospace;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-top: 8px;
+            text-align: center;
+            background: rgba(15,23,42,0.8);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            animation: textSlideIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards;
             opacity: 0;
         }
-        .icon.ok { background: rgba(34,197,94,0.9); box-shadow: 0 0 15px rgba(34,197,94,0.8); }
-        .icon.bad { background: rgba(239,68,68,0.9); box-shadow: 0 0 15px rgba(239,68,68,0.8); }
-        .icon.warn { background: rgba(234,179,8,0.9); box-shadow: 0 0 15px rgba(234,179,8,0.8); }
-        .icon svg { width: 100%; height: 100%; stroke: white; fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+        .lane-timer.urgent { color: #f87171; border-color: rgba(239,68,68,0.5); }
         .footer {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -223,12 +211,6 @@
             60% { transform: translateY(4px) scale(1.05); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes iconBounce {
-            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-            60% { transform: scale(1.3) rotate(10deg); opacity: 1; }
-            80% { transform: scale(0.9) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
         .car-wrap {
             position: relative;
             animation: driveIn 1.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
@@ -254,18 +236,14 @@
     <main class="app">
         <div id="current-datetime" class="datetime">Загрузка...</div>
         <h1>Нагорное шоссе</h1>
-        <div class="timer">
-            <div id="timer-title" class="timer-title">...</div>
-            <div id="timer-value" class="timer-value">--:--:--</div>
-        </div>
         <div class="road">
             <div class="divider"></div>
             <div id="left-lane" class="lane">
-                <div class="lane-label">Слева<small>(знак 3.29, можно в четные)</small></div>
+                <div class="lane-label">Слева<small>3.29 · чётные</small></div>
                 <div id="left-road-content" class="content"></div>
             </div>
             <div id="right-lane" class="lane">
-                <div class="lane-label">Справа<small>(знак 3.30, можно в нечетные)</small></div>
+                <div class="lane-label">Справа<small>3.30 · нечётные</small></div>
                 <div id="right-road-content" class="content"></div>
             </div>
         </div>
@@ -307,7 +285,7 @@
                 <div class="car-wrap" ${d}>
                     <div class="beam left" ${d}></div>
                     <div class="beam right" ${d}></div>
-                    <svg viewBox="0 0 100 200" width="80" height="160" style="display:block;filter:drop-shadow(0 10px 15px rgba(0,0,0,0.5))">
+                    <svg viewBox="0 0 100 200" width="60" height="120" style="display:block;filter:drop-shadow(0 10px 15px rgba(0,0,0,0.5))">
                         <defs>
                             <linearGradient id="bg${num}" x1="0" y1="0" x2="1" y2="1">
                                 <stop offset="0%" stop-color="#fff"/>
@@ -341,12 +319,6 @@
                 </div>`;
         }
 
-        const icons = {
-            ok: `<div class="icon ok"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>`,
-            bad: `<div class="icon bad"><svg viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></div>`,
-            warn: `<div class="icon warn"><svg viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M12 3l9 16H3L12 3z"/></svg></div>`
-        };
-
         function badge(text, color) {
             return `<div class="badge ${color}">${text}</div>`;
         }
@@ -360,7 +332,6 @@
             const isChangeover = now.getHours() >= 21;
             const todayOdd = now.getDate() % 2 !== 0;
             
-            // ИСПРАВЛЕННАЯ ЛОГИКА ПДД:
             // Знак 3.29 (I, слева): запрещена в нечетные -> разрешена в ЧЕТНЫЕ (!todayOdd)
             // Знак 3.30 (II, справа): запрещена в четные -> разрешена в НЕЧЕТНЫЕ (todayOdd)
             
@@ -386,45 +357,54 @@
             rightL.className = 'lane';
 
             if (isChangeover) {
-                // С 21:00 до 00:00: Парковка разрешена с обеих сторон (рисуем 2 машинки)
-                // Но одна сторона станет запрещенной после 00:00
+                // С 21:00 до 00:00: Парковка разрешена с обеих сторон
                 
                 if (nextValidLeft) {
-                    // Левая сторона будет разрешена после 00:00
+                    // Левая сторона будет разрешена после 00:00 — зелёный бейдж, БЕЗ таймера
                     leftL.classList.add('ok');
-                    leftC.innerHTML = badge('Можно (останется после 00:00)', 'green') + createCar(1, 0) + icons.ok;
+                    leftC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + 
+                                      createCar(1, 0);
                 } else {
-                    // Левую сторону нужно освободить до 00:00
+                    // Левую сторону нужно освободить до 00:00 — красный бейдж, С таймером под машинкой
                     leftL.classList.add('warn');
-                    leftC.innerHTML = badge('Перепарковать на другую сторону до 00:00', 'red') + createCar(1, 0.2) + icons.warn;
+                    leftC.innerHTML = badge('Переставляем машину до 0:00', 'red') + 
+                                      createCar(1, 0.2) +
+                                      '<div id="left-timer" class="lane-timer urgent">--:--:--</div>';
                 }
 
                 if (nextValidRight) {
-                    // Правая сторона будет разрешена после 00:00
+                    // Правая сторона будет разрешена после 00:00 — зелёный бейдж, БЕЗ таймера
                     rightL.classList.add('ok');
-                    rightC.innerHTML = badge('Можно (останется после 00:00)', 'green') + createCar(2, 0) + icons.ok;
+                    rightC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + 
+                                       createCar(2, 0);
                 } else {
-                    // Правую сторону нужно освободить до 00:00
+                    // Правую сторону нужно освободить до 00:00 — красный бейдж, С таймером под машинкой
                     rightL.classList.add('warn');
-                    rightC.innerHTML = badge('Перепарковать на другую сторону до 00:00', 'red') + createCar(2, 0.2) + icons.warn;
+                    rightC.innerHTML = badge('Переставляем машину до 0:00', 'red') + 
+                                       createCar(2, 0.2) +
+                                       '<div id="right-timer" class="lane-timer urgent">--:--:--</div>';
                 }
             } else {
-                // С 00:00 до 21:00: Парковка разрешена только с одной стороны (рисуем 1 машинку)
+                // С 00:00 до 21:00: Парковка разрешена только с одной стороны
                 
                 if (currentValidLeft) {
                     leftL.classList.add('ok');
-                    leftC.innerHTML = badge('Можно парковаться', 'green') + createCar(1, 0) + icons.ok;
+                    leftC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + 
+                                      createCar(1, 0) +
+                                      '<div id="left-timer" class="lane-timer">--:--:--</div>';
                 } else {
                     leftL.classList.add('disabled');
-                    leftC.innerHTML = badge('Нельзя', 'red') + icons.bad;
+                    leftC.innerHTML = badge('Нельзя', 'red');
                 }
 
                 if (currentValidRight) {
                     rightL.classList.add('ok');
-                    rightC.innerHTML = badge('Можно парковаться', 'green') + createCar(2, 0) + icons.ok;
+                    rightC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + 
+                                       createCar(2, 0) +
+                                       '<div id="right-timer" class="lane-timer">--:--:--</div>';
                 } else {
                     rightL.classList.add('disabled');
-                    rightC.innerHTML = badge('Нельзя', 'red') + icons.bad;
+                    rightC.innerHTML = badge('Нельзя', 'red');
                 }
             }
         }
@@ -433,25 +413,25 @@
             const now = new Date();
             const target = new Date(now);
             const isChangeover = now.getHours() >= 21;
-            const title = document.getElementById('timer-title');
-            const value = document.getElementById('timer-value');
-
+            
             if (isChangeover) {
                 target.setDate(target.getDate() + 1);
                 target.setHours(0, 0, 0, 0);
-                title.textContent = "До окончания перестановки (00:00):";
-                value.classList.add('urgent');
             } else {
                 target.setHours(21, 0, 0, 0);
-                title.textContent = "До начала перестановки (21:00):";
-                value.classList.remove('urgent');
             }
-
+            
             let diff = Math.max(0, target - now);
             const h = Math.floor(diff / 3600000) % 24;
             const m = Math.floor(diff / 60000) % 60;
             const s = Math.floor(diff / 1000) % 60;
-            value.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            
+            const leftTimer = document.getElementById('left-timer');
+            const rightTimer = document.getElementById('right-timer');
+            
+            if (leftTimer) leftTimer.textContent = timeStr;
+            if (rightTimer) rightTimer.textContent = timeStr;
         }
 
         let lastState = null;
@@ -459,7 +439,6 @@
             const logic = calculateLogic();
             updateTimerLive();
             
-            // Проверяем, изменилось ли состояние, чтобы не перерисовывать DOM каждую секунду
             const currentState = `${logic.isChangeover}-${logic.currentValidLeft}-${logic.nextValidLeft}`;
             if (lastState !== currentState) {
                 drawRoad(logic);
