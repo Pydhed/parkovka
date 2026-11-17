@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ассистент Парковки</title>
     <meta name="theme-color" content="#0f172a">
     
@@ -21,18 +21,21 @@
     <link rel="apple-touch-icon" sizes="120x120" href="logo-gradient.png">
     
     <style>
+        /* Apple-стиль шрифты и база */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: #0f172a;
             color: #e2e8f0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            letter-spacing: -0.015em;
         }
+        
         .app {
             flex: 1;
             display: flex;
@@ -42,46 +45,56 @@
             width: 100%;
             max-width: 28rem;
             margin: 0 auto;
+            position: relative;
+            z-index: 10;
         }
+        
         .datetime {
-            background: rgba(30,41,59,0.5);
+            background: rgba(30,41,59,0.7);
+            backdrop-filter: blur(10px);
             border: 1px solid #334155;
             padding: 6px 16px;
             border-radius: 999px;
             font-size: 14px;
+            font-weight: 500;
             color: #cbd5e1;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             white-space: nowrap;
         }
+        
         h1 {
-            font-size: 24px;
-            font-weight: 800;
+            font-size: 26px;
+            font-weight: 700;
             color: white;
             text-align: center;
             margin-bottom: 12px;
+            letter-spacing: -0.03em;
         }
+        
         .road {
             width: 100%;
-            height: 320px;
-            background: #475569;
+            height: 280px;
+            background: #334155;
             border-radius: 24px;
-            border: 4px solid #64748b;
+            border: 3px solid #475569;
             display: flex;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.45);
             overflow: hidden;
+            flex-shrink: 0;
         }
+        
         .divider {
             position: absolute;
             top: 0; bottom: 0;
             left: 50%;
-            width: 8px;
-            margin-left: -4px;
-            border-left: 8px dashed #cbd5e1;
-            opacity: 0.6;
+            width: 6px;
+            margin-left: -3px;
+            border-left: 6px dashed #94a3b8;
+            opacity: 0.5;
             z-index: 10;
-            border-radius: 999px;
         }
+        
         .lane {
             flex: 1;
             display: flex;
@@ -89,15 +102,15 @@
             align-items: center;
             justify-content: flex-start;
             position: relative;
-            background: rgba(30,41,59,0.8);
+            background: rgba(30,41,59,0.85);
             transition: all 0.5s;
             overflow: hidden;
             padding-top: 10px;
         }
-        .lane.ok { background: rgba(30,41,59,1); box-shadow: inset 0 4px 0 rgba(34,197,94,0.6); }
-        .lane.warn { box-shadow: inset 0 4px 0 rgba(234,179,8,0.6); }
+        .lane.ok { background: rgba(30,41,59,1); box-shadow: inset 0 4px 0 rgba(34,197,94,0.7); }
+        .lane.warn { box-shadow: inset 0 4px 0 rgba(234,179,8,0.7); }
         .lane.disabled { opacity: 0.4; }
-        /* ПОДПИСЬ ТЕПЕРЬ В ПОТОКЕ — не наезжает ни при каком переносе */
+        
         .lane-label {
             position: static;
             color: #cbd5e1;
@@ -111,58 +124,100 @@
             line-height: 1.2;
         }
         .lane-label small { font-size: 9px; color: #94a3b8; display: block; font-weight: 600; }
-        .content {
-            width: 100%;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 0;
-        }
+        
+        .content { width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        
         .badge {
             font-size: 10px;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             background: rgba(15,23,42,0.9);
             padding: 6px 8px;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.25);
             animation: textSlideIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards;
             opacity: 0;
             line-height: 1.25;
-            min-height: 44px;
+            min-height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 92%;
-            word-break: break-word;
         }
         .badge.green { color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
         .badge.red { color: #f87171; border: 1px solid rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); }
         .badge.yellow { color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+        
         .lane-timer {
-            font-size: 14px;
-            font-family: ui-monospace, monospace;
+            font-size: 13px;
+            font-family: "SF Mono", ui-monospace, monospace;
             font-weight: 700;
             color: #fbbf24;
-            margin-top: 8px;
+            margin-top: 6px;
             text-align: center;
-            background: rgba(15,23,42,0.8);
+            background: rgba(15,23,42,0.85);
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #334155;
             animation: textSlideIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards;
             opacity: 0;
         }
         .lane-timer.urgent { color: #f87171; border-color: rgba(239,68,68,0.5); }
+        
+        /* БОЛЬШИЕ КНОПКИ МЕТРО ДО ФУТЕРА */
+        .metro-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            flex: 1;
+            margin-top: 14px;
+            margin-bottom: 76px;
+        }
+        
+        .metro-btn {
+            flex: 1;
+            padding: 16px 12px;
+            border-radius: 22px;
+            border: none;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 12px 24px -6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.25);
+            transition: transform 0.15s cubic-bezier(0.4,0,0.2,1), filter 0.15s;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .metro-btn:active { transform: scale(0.96); filter: brightness(0.92); }
+        
+        .btn-bel { background: linear-gradient(145deg, #22c55e, #15803d); }
+        .btn-pla { background: linear-gradient(145deg, #a855f7, #6b21a8); }
+        
+        .metro-btn-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .metro-btn-icon svg { width: 22px; height: 22px; fill: white; }
+
+        /* ФУТЕР И ОБНОВИТЬ */
         .footer {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: rgba(15,23,42,0.95);
-            backdrop-filter: blur(8px);
-            padding: 8px 16px 16px;
+            background: rgba(15,23,42,0.88);
+            backdrop-filter: blur(16px);
+            padding: 10px 16px 22px;
             border-top: 1px solid #1e293b;
             display: flex;
             justify-content: center;
@@ -173,10 +228,11 @@
             max-width: 28rem;
             background: #334155;
             color: white;
-            font-size: 18px;
-            font-weight: 700;
-            padding: 12px;
-            border-radius: 12px;
+            font-family: inherit;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 14px;
+            border-radius: 16px;
             border: none;
             display: flex;
             align-items: center;
@@ -185,48 +241,151 @@
             cursor: pointer;
             transition: transform 0.1s;
         }
-        .refresh-btn:active { transform: scale(0.98); background: #1e293b; }
-        .refresh-btn svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .refresh-btn:active { transform: scale(0.97); background: #1e293b; }
+        .refresh-btn svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
 
+        /* МОДАЛЬНОЕ ОКНО */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 88vh;
+            background: #0f172a;
+            border-radius: 30px 30px 0 0;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+        }
+        .modal.active { transform: translateY(0); }
+        
+        .modal-drag {
+            width: 40px; height: 5px;
+            background: #475569;
+            border-radius: 3px;
+            margin: 10px auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px 14px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .modal-header h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; color: white; }
+        
+        .close-top {
+            width: 32px; height: 32px;
+            background: #334155;
+            border-radius: 50%;
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .close-top svg { width: 16px; height: 16px; stroke: #cbd5e1; stroke-width: 2.2; stroke-linecap: round; }
+        
+        .modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .section-card {
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        
+        /* Цветовое кодирование разделов */
+        .bg-green { background: rgba(34,197,94,0.14); border: 1px solid rgba(34,197,94,0.32); }
+        .bg-purple { background: rgba(168,85,247,0.14); border: 1px solid rgba(168,85,247,0.32); }
+        .bg-yellow { background: rgba(234,179,8,0.14); border: 1px solid rgba(234,179,8,0.32); }
+        
+        .section-card h3 {
+            font-size: 16px; font-weight: 700; margin-bottom: 10px; color: white;
+            display: flex; align-items: center; gap: 8px;
+        }
+        
+        .stop-block { margin-bottom: 12px; }
+        .stop-block:last-child { margin-bottom: 0; }
+        .stop-name { font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+        
+        .route-item {
+            background: rgba(15,23,42,0.65);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 11px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .route-item:last-child { margin-bottom: 0; }
+        .route-info { display: flex; align-items: center; gap: 10px; }
+        .route-icon {
+            width: 34px; height: 34px;
+            background: #1e293b;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .route-icon svg { width: 19px; height: 19px; fill: #38bdf8; }
+        .route-num { font-size: 18px; font-weight: 700; color: white; }
+        .route-times { text-align: right; }
+        .time-next { font-size: 16px; font-weight: 700; color: #4ade80; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+        .countdown { font-size: 11px; font-weight: 600; background: rgba(74,222,128,0.15); color: #4ade80; padding: 2px 6px; border-radius: 6px; }
+        .time-later { font-size: 13px; color: #94a3b8; font-weight: 500; margin-top: 3px; }
+
+        .close-bottom {
+            width: 100%;
+            background: #1e293b;
+            color: white;
+            font-family: inherit;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            cursor: pointer;
+        }
+        .close-bottom:active { background: #334155; }
+
+        /* Плоские стильные машинки в стиле Apple */
         @keyframes driveIn {
-            0% { transform: translateY(200px); opacity: 0; }
+            0% { transform: translateY(180px); opacity: 0; }
             15% { opacity: 1; }
             100% { transform: translateY(0); opacity: 1; }
         }
-        @keyframes headlightsOn {
-            0%, 70% { filter: drop-shadow(0 0 12px #fef08a) drop-shadow(0 0 25px #fef9c3) drop-shadow(0 0 40px #fef08a); }
-            100% { filter: none; }
-        }
-        @keyframes taillightsOn {
-            0%, 70% { filter: drop-shadow(0 0 10px #ef4444) drop-shadow(0 0 20px #ef4444); }
-            100% { filter: none; }
-        }
         @keyframes beamFade {
             0%, 15% { opacity: 0; }
-            25%, 70% { opacity: 1; }
+            25%, 70% { opacity: 0.75; }
             100% { opacity: 0; }
         }
         @keyframes textSlideIn {
-            0% { opacity: 0; transform: translateY(-20px) scale(0.8); }
-            60% { transform: translateY(4px) scale(1.05); }
+            0% { opacity: 0; transform: translateY(-16px) scale(0.85); }
+            60% { transform: translateY(3px) scale(1.03); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .car-wrap {
-            position: relative;
-            animation: driveIn 1.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-            opacity: 0;
-        }
-        .headlight { animation: headlightsOn 1.3s ease-out forwards; }
-        .taillight { animation: taillightsOn 1.3s ease-out forwards; }
+        .car-wrap { position: relative; animation: driveIn 1.2s cubic-bezier(0.25,0.46,0.45,0.94) forwards; opacity: 0; }
         .beam {
-            position: absolute;
-            top: -64px;
-            width: 32px;
-            height: 64px;
-            background: linear-gradient(to top, rgba(254,240,138,0.85), rgba(254,240,138,0.3) 40%, transparent);
+            position: absolute; top: -55px; width: 28px; height: 55px;
+            background: linear-gradient(to top, rgba(254,240,138,0.7), transparent);
             clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-            animation: beamFade 1.3s ease-out forwards;
-            opacity: 0;
+            animation: beamFade 1.2s ease-out forwards; opacity: 0;
         }
         .beam.left { left: 8px; }
         .beam.right { right: 8px; }
@@ -247,6 +406,21 @@
                 <div id="right-road-content" class="content"></div>
             </div>
         </div>
+
+        <div class="metro-buttons">
+            <button class="metro-btn btn-bel" onclick="openSchedule('belomorskaya')">
+                <div class="metro-btn-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                </div>
+                Добраться до<br>м. Беломорская
+            </button>
+            <button class="metro-btn btn-pla" onclick="openSchedule('planernaya')">
+                <div class="metro-btn-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                </div>
+                Добраться до<br>м. Планерная
+            </button>
+        </div>
     </main>
 
     <div class="footer">
@@ -256,8 +430,24 @@
         </button>
     </div>
 
+    <!-- Модальное окно расписания -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeSchedule()"></div>
+    <div class="modal" id="schedule-modal">
+        <div class="modal-drag"></div>
+        <div class="modal-header">
+            <h2 id="modal-title">Транспорт</h2>
+            <button class="close-top" onclick="closeSchedule()">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="modal-content" id="modal-body"></div>
+        <div style="padding: 8px 20px 24px;">
+            <button class="close-bottom" onclick="closeSchedule()">Закрыть</button>
+        </div>
+    </div>
+
     <script>
-        // PWA Манифест для установки на рабочий стол
+        // --- PWA МАНИФЕСТ ---
         const manifestData = {
             "name": "Ассистент Парковки",
             "short_name": "Парковка",
@@ -279,49 +469,497 @@
         manifestLink.href = URL.createObjectURL(manifestBlob);
         document.head.appendChild(manifestLink);
 
+        // --- ИКОНКИ ТРАНСПОРТА ---
+        const svgBus = `<svg viewBox="0 0 24 24"><path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h4v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v6z"/></svg>`;
+        const svgTroll = `<svg viewBox="0 0 24 24"><path d="M13 2v2h2l-2.5 4H18v10c0 1.1-.9 2-2 2h-1v2c0 .55-.45 1-1 1h-1c-.55 0-1-.45-1-1v-2H8v2c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-2c-1.1 0-2-.9-2-2V8h5.5L6 4h2v-2h5zm-5.5 15c.83 0 1.5-.67 1.5-1.5S8.33 14 7.5 14 6 14.67 6 15.5 6.67 17 7.5 17zm9 0c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/></svg>`;
+
+        // --- ОФИЦИАЛЬНЫЕ РАСПИСАНИЯ ПО ОСТАНОВКАМ В СТОРОНУ МОСКВЫ ---
+        const officialSchedules = {
+            // Автобус 400: Родионово -> в сторону м. Беломорская
+            '400': [
+                "00:25", "00:52",
+                "05:46", "05:59",
+                "06:12", "06:25", "06:38", "06:49",
+                "07:00", "07:17", "07:34", "07:49",
+                "08:03", "08:16", "08:28", "08:40", "08:52",
+                "09:04", "09:15", "09:26", "09:35", "09:47", "09:58",
+                "10:10", "10:24", "10:38", "10:53",
+                "11:08", "11:22", "11:36", "11:50",
+                "12:04", "12:18", "12:32", "12:47",
+                "13:02", "13:17", "13:32", "13:46",
+                "14:00", "14:14", "14:28", "14:42", "14:57",
+                "15:12", "15:27", "15:41", "15:55",
+                "16:10", "16:25", "16:40", "16:55",
+                "17:10", "17:24", "17:37", "17:52",
+                "18:07", "18:21", "18:34", "18:46", "18:58",
+                "19:09", "19:20", "19:32", "19:44", "19:57",
+                "20:09", "20:21", "20:33", "20:50",
+                "21:06", "21:19", "21:33", "21:48",
+                "22:19", "22:51",
+                "23:21", "23:53"
+            ],
+            // Автобус 851: Родионово -> в сторону м. Беломорская
+            '851': [
+                "00:06", "00:25", "00:43",
+                "01:01",
+                "05:31", "05:46",
+                "06:01", "06:16", "06:31", "06:46", "06:55",
+                "07:06", "07:16", "07:26", "07:35", "07:44", "07:54",
+                "08:04", "08:14", "08:24", "08:33", "08:42", "08:51",
+                "09:00", "09:09", "09:19", "09:29", "09:39", "09:49", "09:59",
+                "10:09", "10:19", "10:30", "10:44", "10:58",
+                "11:12", "11:26", "11:40", "11:54",
+                "12:08", "12:23", "12:38", "12:52",
+                "13:07", "13:21", "13:36", "13:50",
+                "14:04", "14:17", "14:31", "14:45", "14:58",
+                "15:10", "15:22", "15:34", "15:46", "15:58",
+                "16:10", "16:23", "16:36", "16:49",
+                "17:02", "17:15", "17:27", "17:39", "17:51",
+                "18:03", "18:12", "18:21", "18:30", "18:38", "18:46", "18:55",
+                "19:04", "19:13", "19:22", "19:31", "19:41", "19:51",
+                "20:01", "20:11", "20:20", "20:30", "20:40", "20:50",
+                "21:00", "21:07", "21:15", "21:24", "21:38", "21:53",
+                "22:07", "22:21", "22:38", "22:55",
+                "23:13", "23:30", "23:48"
+            ],
+            // Маршрутка 342к: Родионово -> в сторону м. Беломорская
+            '342к': [
+                "06:31", "06:51",
+                "07:11", "07:31", "07:51",
+                "08:11", "08:31", "08:51",
+                "09:11", "09:31", "09:51",
+                "10:11", "10:31", "10:51",
+                "11:11", "11:31", "11:51",
+                "12:11", "12:31", "12:51",
+                "13:11", "13:31", "13:51",
+                "14:11", "14:31", "14:51",
+                "15:11", "15:31", "15:51",
+                "16:11", "16:31", "16:51",
+                "17:11", "17:31", "17:51",
+                "18:11", "18:31", "18:51",
+                "19:11", "19:31", "19:51",
+                "20:11", "20:36",
+                "21:06", "21:31",
+                "22:01", "22:31",
+                "23:06"
+            ],
+            // Автобус 817: Родионово -> в сторону м. Планерная
+            '817': [
+                "00:29",
+                "05:40", "05:56",
+                "06:12", "06:28", "06:44",
+                "07:00", "07:22", "07:38", "07:54",
+                "08:10", "08:26", "08:43",
+                "09:00", "09:24", "09:49",
+                "10:13", "10:37", "10:56",
+                "11:15", "11:34", "11:53",
+                "12:12", "12:31", "12:50",
+                "13:10", "13:31", "13:52",
+                "14:13", "14:35", "14:56",
+                "15:17", "15:38", "15:59",
+                "16:20", "16:42",
+                "17:03", "17:27", "17:48",
+                "18:05", "18:23", "18:40", "18:57",
+                "19:16", "19:40",
+                "20:06", "20:35",
+                "21:04", "21:28", "21:57",
+                "22:27", "22:57",
+                "23:27", "23:58"
+            ],
+            '948': [
+                "06:10", "06:25", "06:40", "06:55", "07:10", "07:25", "07:40", "07:55", "08:10", "08:25",
+                "08:40", "08:55", "09:10", "09:30", "09:50", "10:10", "10:30", "10:50", "11:10", "11:30",
+                "11:50", "12:10", "12:30", "12:50", "13:10", "13:30", "13:50", "14:10", "14:30", "14:50",
+                "15:10", "15:30", "15:50", "16:10", "16:25", "16:40", "16:55", "17:10", "17:25", "17:40",
+                "17:55", "18:10", "18:25", "18:40", "18:55", "19:15", "19:35", "19:55", "20:15", "20:40",
+                "21:05", "21:30", "22:00"
+            ],
+            // Автобус 865: Родионово -> в сторону м. Планерная
+            '865': [
+                "09:56",
+                "10:27",
+                "11:00", "11:33",
+                "12:11", "12:49",
+                "13:26",
+                "14:00", "14:34",
+                "15:08", "15:43",
+                "16:18", "16:52",
+                "17:25", "17:58"
+            ],
+            // Автобус 865к: Родионово -> в сторону м. Планерная
+            '865к': [
+                "05:46",
+                "06:01", "06:16", "06:31", "06:45",
+                "07:00", "07:24", "07:41",
+                "08:00", "08:18", "08:33", "08:48",
+                "09:03", "09:17", "09:32", "09:49",
+                "10:05", "10:29", "10:52",
+                "11:15", "11:36", "11:54",
+                "12:16", "12:39", "12:59",
+                "13:19", "13:39",
+                "14:01", "14:22", "14:43",
+                "15:03", "15:23", "15:45",
+                "16:06", "16:27", "16:46",
+                "17:04", "17:28", "17:53",
+                "18:11", "18:30", "18:48",
+                "19:05", "19:22", "19:51",
+                "20:20", "20:58",
+                "21:27", "21:59"
+            ],
+
+            // Автобус 1341: Улица 9 Мая, 4А -> в сторону м. Беломорская
+            '1341': [
+                "00:16", "00:58",
+                "06:13", "06:41",
+                "07:19", "07:50",
+                "08:17", "08:43",
+                "09:12", "09:34",
+                "10:04", "10:38",
+                "11:12", "11:45",
+                "12:19", "12:45",
+                "13:11", "13:37",
+                "14:03", "14:28", "14:53",
+                "15:18", "15:44",
+                "16:10", "16:36",
+                "17:02", "17:37",
+                "18:10", "18:43",
+                "19:13", "19:45",
+                "20:16", "20:47",
+                "21:16", "21:47",
+                "22:20", "22:53",
+                "23:34"
+            ],
+            // Автобус 1532: Улица 9 Мая, 4А -> в сторону м. Беломорская
+            '1532': [
+                "05:28", "05:57",
+                "06:25", "06:45",
+                "07:08", "07:32", "07:57",
+                "08:22", "08:47",
+                "09:09", "09:33", "09:59",
+                "10:26", "10:54",
+                "11:22", "11:49",
+                "12:17", "12:45",
+                "13:13", "13:41",
+                "14:09", "14:36",
+                "15:03", "15:30", "15:59",
+                "16:26", "16:56",
+                "17:32",
+                "18:07", "18:32", "18:53",
+                "19:11", "19:31", "19:51",
+                "20:16", "20:55",
+                "21:33",
+                "22:12", "22:51",
+                "23:28"
+            ],
+            // Автобус 1154: Улица 9 Мая, 4А -> в сторону м. Планерная
+            '1154': [
+                "06:03", "06:27", "06:52",
+                "07:24", "07:57",
+                "08:31",
+                "09:04", "09:41",
+                "10:24",
+                "11:07", "11:50",
+                "12:34",
+                "13:18",
+                "14:02", "14:46",
+                "15:15", "15:45",
+                "16:15", "16:53",
+                "17:40",
+                "18:32",
+                "19:14", "19:48",
+                "20:16",
+                "21:19"
+            ],
+            // Автобус 1480: Улица 9 Мая, 4А -> в сторону м. Планерная
+            '1480': [
+                "00:11", "00:29", "00:47",
+                "05:23", "05:40", "05:57",
+                "06:14", "06:31", "06:48",
+                "07:05", "07:27", "07:44",
+                "08:01", "08:18", "08:36", "08:54",
+                "09:11", "09:22", "09:44",
+                "10:06", "10:28", "10:50",
+                "11:12", "11:35", "11:57",
+                "12:19", "12:42",
+                "13:04", "13:26", "13:49",
+                "14:11", "14:33", "14:56",
+                "15:13", "15:30", "15:46",
+                "16:03", "16:20", "16:38", "16:57",
+                "17:20", "17:44",
+                "18:05", "18:23", "18:41", "18:59",
+                "19:14", "19:31", "19:47",
+                "20:06", "20:25", "20:47",
+                "21:07", "21:26", "21:42",
+                "22:02", "22:22", "22:42",
+                "23:02", "23:19", "23:35", "23:53"
+            ],
+
+            // Автобус 1443: Улица Лавочкина -> в сторону м. Беломорская
+            '1443': [
+                "00:10", "00:22", "00:34", "00:47",
+                "01:00", "01:13", "01:26",
+                "05:16", "05:29", "05:42", "05:55",
+                "06:06", "06:17", "06:23", "06:29", "06:35", "06:40", "06:45", "06:48", "06:51", "06:54", "06:57",
+                "07:00", "07:03", "07:07", "07:11", "07:17", "07:21", "07:25", "07:28", "07:31", "07:35", "07:39", "07:42", "07:46", "07:50", "07:54", "07:57",
+                "08:01", "08:04", "08:08", "08:11", "08:15", "08:18", "08:22", "08:25", "08:29", "08:33", "08:37", "08:41", "08:44", "08:48", "08:51", "08:55", "08:58",
+                "09:02", "09:05", "09:08", "09:11", "09:14", "09:17", "09:21", "09:24", "09:28", "09:32", "09:36", "09:40", "09:44", "09:48", "09:52", "09:56",
+                "10:00", "10:04", "10:08", "10:14", "10:20", "10:26", "10:32", "10:38", "10:44", "10:50", "10:56",
+                "11:02", "11:08", "11:14", "11:20", "11:26", "11:32", "11:38", "11:44", "11:50", "11:56",
+                "12:02", "12:08", "12:14", "12:20", "12:26", "12:32", "12:38", "12:44", "12:50", "12:56",
+                "13:02", "13:08", "13:14", "13:20", "13:26", "13:32", "13:38", "13:44", "13:50", "13:56",
+                "14:02", "14:08", "14:14", "14:20", "14:26", "14:32", "14:38", "14:44", "14:50", "14:56",
+                "15:02", "15:08", "15:14", "15:20", "15:26", "15:32", "15:38", "15:44", "15:50", "15:56",
+                "16:02", "16:08", "16:14", "16:20", "16:26", "16:31", "16:36", "16:41", "16:46", "16:51", "16:56",
+                "17:01", "17:06", "17:11", "17:18", "17:27", "17:32", "17:37", "17:42", "17:47", "17:52", "17:57",
+                "18:02", "18:07", "18:11", "18:15", "18:19", "18:23", "18:27", "18:31", "18:35", "18:39", "18:43", "18:47", "18:51", "18:55", "18:59",
+                "19:03", "19:07", "19:11", "19:14", "19:17", "19:19", "19:22", "19:26", "19:30", "19:34", "19:38", "19:42", "19:46", "19:50", "19:54", "19:58",
+                "20:02", "20:07", "20:12", "20:17", "20:22", "20:27", "20:32", "20:37", "20:42", "20:47", "20:52", "20:57",
+                "21:02", "21:06", "21:10", "21:15", "21:22", "21:29", "21:36", "21:43", "21:50", "21:57",
+                "22:04", "22:11", "22:18", "22:25", "22:32", "22:44", "22:56",
+                "23:09", "23:20", "23:33", "23:45", "23:57"
+            ],
+            '986к': [
+                "06:00", "06:12", "06:24", "06:36", "06:48", "07:00", "07:10", "07:20", "07:30", "07:40",
+                "07:50", "08:00", "08:10", "08:20", "08:30", "08:42", "08:54", "09:06", "09:20", "09:35",
+                "09:50", "10:05", "10:20", "10:35", "10:50", "11:05", "11:20", "11:35", "11:50", "12:05",
+                "12:20", "12:35", "12:50", "13:05", "13:20", "13:35", "13:50", "14:05", "14:20", "14:35",
+                "14:50", "15:05", "15:20", "15:35", "15:50", "16:02", "16:14", "16:26", "16:38", "16:50",
+                "17:02", "17:14", "17:26", "17:38", "17:50", "18:02", "18:14", "18:26", "18:38", "18:50",
+                "19:05", "19:20", "19:35", "19:50", "20:05", "20:20", "20:40", "21:00", "21:20", "21:45",
+                "22:10", "22:35", "23:00"
+            ],
+            // Автобус 1383: Улица Лавочкина -> в сторону м. Планерная
+            '1383': [
+                "05:36", "05:56",
+                "06:16", "06:36", "06:44", "06:52", "06:59",
+                "07:07", "07:15", "07:24", "07:33", "07:42", "07:51",
+                "08:00", "08:09", "08:18", "08:28", "08:38", "08:48",
+                "09:00", "09:12", "09:24", "09:36", "09:48",
+                "10:00", "10:14", "10:28", "10:42", "10:57",
+                "11:12", "11:27", "11:42", "11:57",
+                "12:13", "12:28", "12:43", "12:58",
+                "13:13", "13:29", "13:44", "13:59",
+                "14:14", "14:29", "14:45",
+                "15:00", "15:15", "15:30", "15:45",
+                "16:01", "16:16", "16:31", "16:46",
+                "17:01", "17:20", "17:37", "17:54",
+                "18:11", "18:27", "18:42", "18:57",
+                "19:07", "19:16", "19:28", "19:41", "19:54",
+                "20:07", "20:22", "20:37", "20:52",
+                "21:14", "21:40",
+                "22:13", "22:46",
+                "23:20"
+            ],
+            '946к': [
+                "06:20", "06:32", "06:44", "06:56", "07:06", "07:16", "07:26", "07:36", "07:46", "07:56",
+                "08:06", "08:16", "08:26", "08:36", "08:48", "09:00", "09:12", "09:25", "09:40", "09:55",
+                "10:10", "10:25", "10:40", "10:55", "11:10", "11:25", "11:40", "11:55", "12:10", "12:25",
+                "12:40", "12:55", "13:10", "13:25", "13:40", "13:55", "14:10", "14:25", "14:40", "14:55",
+                "15:10", "15:25", "15:40", "15:52", "16:04", "16:16", "16:28", "16:40", "16:52", "17:04",
+                "17:16", "17:28", "17:40", "17:52", "18:04", "18:16", "18:28", "18:40", "18:52", "19:05",
+                "19:20", "19:35", "19:50", "20:05", "20:20", "20:35", "20:50", "21:05", "21:20", "21:40",
+                "22:00", "22:20", "22:45", "23:10", "23:35", "23:55"
+            ]
+        };
+
+        // Расписание троллейбуса 202 от ул. Лавочкина в сторону м. Планерная
+        const trolley202Schedules = {
+            weekday: [
+                "05:34", "05:42", "05:49", "05:57",
+                "06:04", "06:11", "06:18", "06:25", "06:32", "06:39", "06:46", "06:53",
+                "07:00", "07:07", "07:14", "07:21", "07:28", "07:35", "07:42", "07:49", "07:56",
+                "08:03", "08:10", "08:17", "08:24", "08:31", "08:38", "08:45", "08:52", "08:59",
+                "09:09", "09:19", "09:29", "09:39", "09:49", "09:59",
+                "10:09", "10:19", "10:29", "10:39", "10:49", "10:59",
+                "11:09", "11:19", "11:29", "11:39", "11:49", "11:59",
+                "12:09", "12:19", "12:29", "12:39", "12:49", "12:59",
+                "13:07", "13:15", "13:23", "13:31", "13:39", "13:47", "13:55",
+                "14:03", "14:11", "14:19", "14:27", "14:35", "14:43", "14:51", "14:59",
+                "15:07", "15:15", "15:23", "15:31", "15:39", "15:47", "15:55",
+                "16:02", "16:09", "16:16", "16:23", "16:30", "16:37", "16:44", "16:51", "16:58",
+                "17:06", "17:14", "17:22", "17:30", "17:38", "17:46", "17:54",
+                "18:02", "18:10", "18:18", "18:26", "18:34", "18:42", "18:50", "18:58",
+                "19:09", "19:20", "19:31", "19:42", "19:53",
+                "20:04", "20:15", "20:26", "20:37", "20:48", "20:59",
+                "21:07", "21:15", "21:23", "21:31", "21:39", "21:47", "21:55",
+                "22:03", "22:11", "22:19", "22:27", "22:35", "22:43", "22:51", "22:59",
+                "23:16", "23:33", "23:50",
+                "00:02", "00:18", "00:36"
+            ],
+            weekend: [
+                "05:34", "05:49",
+                "06:00", "06:08", "06:16", "06:24", "06:32", "06:40", "06:48", "06:56",
+                "07:04", "07:12", "07:20", "07:28", "07:36", "07:44", "07:52",
+                "08:00", "08:08", "08:16", "08:24", "08:32", "08:40", "08:48", "08:56",
+                "09:07", "09:18", "09:29", "09:40", "09:51",
+                "10:02", "10:13", "10:24", "10:35", "10:46", "10:57",
+                "11:08", "11:19", "11:30", "11:41", "11:52",
+                "12:03", "12:14", "12:25", "12:36", "12:47", "12:58",
+                "13:10", "13:22", "13:34", "13:46", "13:58",
+                "14:10", "14:22", "14:34", "14:46", "14:58",
+                "15:10", "15:22", "15:34", "15:46", "15:58",
+                "16:06", "16:14", "16:22", "16:30", "16:38", "16:46", "16:54",
+                "17:02", "17:10", "17:18", "17:26", "17:34", "17:42", "17:50", "17:58",
+                "18:06", "18:14", "18:22", "18:30", "18:38", "18:46", "18:54",
+                "19:04", "19:14", "19:24", "19:34", "19:44", "19:54",
+                "20:04", "20:14", "20:24", "20:34", "20:44", "20:54",
+                "21:02", "21:10", "21:18", "21:26", "21:34", "21:42", "21:50", "21:58",
+                "22:06", "22:14", "22:22", "22:30", "22:38", "22:46", "22:54",
+                "23:06", "23:18", "23:32", "23:46",
+                "00:04", "00:20", "00:36"
+            ]
+        };
+
+        // --- СТРУКТУРА РАЗДЕЛОВ И ОСТАНОВОК ---
+        const transportData = {
+            'belomorskaya': {
+                title: 'До м. Беломорская',
+                sections: [
+                    { id: 'leningradskoe', name: 'От Ленинградского шоссе', colorClass: 'bg-green', stops: [
+                        { name: 'Остановка Родионово', routes: [ { type: 'bus', num: '400' }, { type: 'bus', num: '851' }, { type: 'bus', num: '342к' } ] }
+                    ]},
+                    { id: 'may9', name: 'От 9 мая', colorClass: 'bg-purple', stops: [
+                        { name: 'Остановка Улица 9-го Мая, 4А', routes: [ { type: 'bus', num: '1341' }, { type: 'bus', num: '1532' } ] }
+                    ]},
+                    { id: 'yubileyniy', name: 'От Юбилейного проспекта', colorClass: 'bg-yellow', stops: [
+                        { name: 'Остановка Улица Лавочкина', routes: [ { type: 'bus', num: '1443' }, { type: 'bus', num: '986к' } ] }
+                    ]}
+                ]
+            },
+            'planernaya': {
+                title: 'До м. Планерная',
+                sections: [
+                    { id: 'leningradskoe', name: 'От Ленинградского шоссе', colorClass: 'bg-green', stops: [
+                        { name: 'Остановка Родионово', routes: [ { type: 'bus', num: '817' }, { type: 'bus', num: '948' }, { type: 'bus', num: '865' }, { type: 'bus', num: '865к' } ] }
+                    ]},
+                    { id: 'may9', name: 'От 9 мая', colorClass: 'bg-purple', stops: [
+                        { name: 'Остановка Улица 9-го Мая, 4А', routes: [ { type: 'bus', num: '1154' }, { type: 'bus', num: '1480' } ] }
+                    ]},
+                    { id: 'yubileyniy', name: 'От Юбилейного проспекта', colorClass: 'bg-yellow', stops: [
+                        { name: 'Остановка Улица Лавочкина', routes: [ { type: 'troll', num: '202' }, { type: 'bus', num: '1383' }, { type: 'bus', num: '946к' } ] }
+                    ]}
+                ]
+            }
+        };
+
+        // --- ВЫЧИСЛЕНИЕ 3 БЛИЖАЙШИХ РЕЙСОВ ---
+        function getNext3Departures(scheduleArray) {
+            const now = new Date();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
+            
+            let parsedTrips = [];
+            scheduleArray.forEach(timeStr => {
+                const [h, m] = timeStr.split(':').map(Number);
+                let mins = h * 60 + m;
+                if (h < 4) {
+                    parsedTrips.push({ totalMins: mins, timeStr, isNextDay: false });
+                    parsedTrips.push({ totalMins: mins + 24 * 60, timeStr, isNextDay: false });
+                } else {
+                    parsedTrips.push({ totalMins: mins, timeStr, isNextDay: false });
+                    parsedTrips.push({ totalMins: mins + 24 * 60, timeStr, isNextDay: true });
+                }
+            });
+            
+            parsedTrips.sort((a, b) => a.totalMins - b.totalMins);
+            
+            const uniqueTrips = [];
+            const seen = new Set();
+            for (const t of parsedTrips) {
+                if (!seen.has(t.totalMins)) {
+                    seen.add(t.totalMins);
+                    uniqueTrips.push(t);
+                }
+            }
+            
+            const upcoming = uniqueTrips.filter(t => t.totalMins >= currentMins).slice(0, 3);
+            
+            return upcoming.map((t, index) => {
+                const diff = t.totalMins - currentMins;
+                if (index === 0) {
+                    const badgeText = diff === 0 ? 'сейчас' : (diff < 60 ? `через ${diff} мин` : `утром`);
+                    return `${t.timeStr} <span class="countdown">${badgeText}</span>`;
+                }
+                return t.timeStr;
+            });
+        }
+
+        function openSchedule(metroId) {
+            const data = transportData[metroId];
+            document.getElementById('modal-title').textContent = data.title;
+            
+            let html = '';
+            data.sections.forEach(sec => {
+                html += `<div class="section-card ${sec.colorClass}">
+                            <h3>${sec.name}</h3>`;
+                sec.stops.forEach(stop => {
+                    html += `<div class="stop-block">
+                                <div class="stop-name">${stop.name}</div>`;
+                    stop.routes.forEach(route => {
+                        let scheduleList;
+                        if (route.num === '202') {
+                            const day = new Date().getDay();
+                            const isWeekend = (day === 0 || day === 6);
+                            scheduleList = isWeekend ? trolley202Schedules.weekend : trolley202Schedules.weekday;
+                        } else {
+                            scheduleList = officialSchedules[route.num] || [];
+                        }
+                        
+                        const times = getNext3Departures(scheduleList);
+                        const icon = route.type === 'troll' ? svgTroll : svgBus;
+                        
+                        html += `
+                            <div class="route-item">
+                                <div class="route-info">
+                                    <div class="route-icon">${icon}</div>
+                                    <div class="route-num">${route.num}</div>
+                                </div>
+                                <div class="route-times">
+                                    <span class="time-next">${times[0] || '--:--'}</span>
+                                    <div class="time-later">${times[1] || ''}${times[2] ? ', ' + times[2] : ''}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+
+            document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('modal-overlay').classList.add('active');
+            document.getElementById('schedule-modal').classList.add('active');
+        }
+
+        function closeSchedule() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('schedule-modal').classList.remove('active');
+        }
+
+        // --- ПЛОСКИЙ APPLE-ДИЗАЙН АВТОМОБИЛЯ ---
         function createCar(num, delay) {
             const d = delay ? `style="animation-delay:${delay}s"` : '';
             return `
                 <div class="car-wrap" ${d}>
                     <div class="beam left" ${d}></div>
                     <div class="beam right" ${d}></div>
-                    <svg viewBox="0 0 100 200" width="60" height="120" style="display:block;filter:drop-shadow(0 10px 15px rgba(0,0,0,0.5))">
-                        <defs>
-                            <linearGradient id="bg${num}" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#fff"/>
-                                <stop offset="50%" stop-color="#e2e8f0"/>
-                                <stop offset="100%" stop-color="#94a3b8"/>
-                            </linearGradient>
-                            <linearGradient id="gl${num}" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#60a5fa"/>
-                                <stop offset="100%" stop-color="#1e3a8a"/>
-                            </linearGradient>
-                        </defs>
-                        <ellipse cx="50" cy="195" rx="38" ry="3" fill="#000" opacity="0.4"/>
-                        <rect x="6" y="38" width="11" height="26" rx="3" fill="#0f172a"/>
-                        <rect x="83" y="38" width="11" height="26" rx="3" fill="#0f172a"/>
-                        <rect x="6" y="138" width="11" height="26" rx="3" fill="#0f172a"/>
-                        <rect x="83" y="138" width="11" height="26" rx="3" fill="#0f172a"/>
-                        <rect x="14" y="10" width="72" height="180" rx="22" fill="url(#bg${num})" stroke="#64748b" stroke-width="1.5"/>
-                        <rect x="22" y="58" width="56" height="88" rx="12" fill="#1e293b"/>
-                        <path d="M 26 58 L 74 58 L 70 42 L 30 42 Z" fill="url(#gl${num})" opacity="0.9"/>
-                        <path d="M 30 42 L 70 42 L 68 46 L 32 46 Z" fill="#93c5fd" opacity="0.5"/>
-                        <path d="M 26 146 L 74 146 L 70 162 L 30 162 Z" fill="url(#gl${num})" opacity="0.9"/>
-                        <rect x="36" y="14" width="28" height="8" rx="2" fill="#0f172a"/>
-                        <ellipse cx="26" cy="20" rx="7" ry="5" fill="#fef9c3" class="headlight" ${d}/>
-                        <ellipse cx="74" cy="20" rx="7" ry="5" fill="#fef9c3" class="headlight" ${d}/>
-                        <ellipse cx="26" cy="20" rx="4" ry="3" fill="#fff"/>
-                        <ellipse cx="74" cy="20" rx="4" ry="3" fill="#fff"/>
-                        <rect x="20" y="182" width="14" height="6" rx="2" fill="#ef4444" class="taillight" ${d}/>
-                        <rect x="66" y="182" width="14" height="6" rx="2" fill="#ef4444" class="taillight" ${d}/>
-                        <rect x="40" y="178" width="20" height="8" rx="1" fill="#f8fafc"/>
+                    <svg viewBox="0 0 100 200" width="58" height="116" style="display:block;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.35))">
+                        <rect x="8" y="36" width="8" height="28" rx="4" fill="#1e293b"/>
+                        <rect x="84" y="36" width="8" height="28" rx="4" fill="#1e293b"/>
+                        <rect x="8" y="136" width="8" height="28" rx="4" fill="#1e293b"/>
+                        <rect x="84" y="136" width="8" height="28" rx="4" fill="#1e293b"/>
+                        <rect x="14" y="10" width="72" height="180" rx="26" fill="#f8fafc"/>
+                        <rect x="22" y="54" width="56" height="92" rx="16" fill="#0f172a"/>
+                        <path d="M 26 56 L 74 56 L 70 40 L 30 40 Z" fill="#38bdf8" opacity="0.85"/>
+                        <path d="M 26 144 L 74 144 L 70 160 L 30 160 Z" fill="#38bdf8" opacity="0.75"/>
+                        <rect x="24" y="14" width="14" height="6" rx="3" fill="#fef08a"/>
+                        <rect x="62" y="14" width="14" height="6" rx="3" fill="#fef08a"/>
+                        <rect x="22" y="182" width="16" height="5" rx="2.5" fill="#ef4444"/>
+                        <rect x="62" y="182" width="16" height="5" rx="2.5" fill="#ef4444"/>
                     </svg>
                 </div>`;
         }
 
-        function badge(text, color) {
-            return `<div class="badge ${color}">${text}</div>`;
-        }
+        function badge(text, color) { return `<div class="badge ${color}">${text}</div>`; }
 
         function calculateLogic() {
             const now = new Date();
@@ -331,17 +969,10 @@
 
             const isChangeover = now.getHours() >= 21;
             const todayOdd = now.getDate() % 2 !== 0;
-            
-            // Знак 3.29 (I, слева): запрещена в нечетные -> разрешена в ЧЕТНЫЕ (!todayOdd)
-            // Знак 3.30 (II, справа): запрещена в четные -> разрешена в НЕЧЕТНЫЕ (todayOdd)
-            
-            const currentValidLeft = !todayOdd;  // Левая активна в четные дни
-            const currentValidRight = todayOdd;  // Правая активна в нечетные дни
-            
-            // После 00:00 четность меняется на противоположную
-            const nextValidLeft = todayOdd;      // Левая станет активна в нечетные (завтра)
-            const nextValidRight = !todayOdd;    // Правая станет активна в четные (завтра)
-
+            const currentValidLeft = !todayOdd;
+            const currentValidRight = todayOdd;
+            const nextValidLeft = todayOdd;
+            const nextValidRight = !todayOdd;
             return { isChangeover, currentValidLeft, currentValidRight, nextValidLeft, nextValidRight };
         }
 
@@ -351,57 +982,35 @@
             const leftL = document.getElementById('left-lane');
             const rightL = document.getElementById('right-lane');
 
-            leftC.innerHTML = '';
-            rightC.innerHTML = '';
-            leftL.className = 'lane';
-            rightL.className = 'lane';
+            leftC.innerHTML = ''; rightC.innerHTML = '';
+            leftL.className = 'lane'; rightL.className = 'lane';
 
             if (isChangeover) {
-                // С 21:00 до 00:00: Парковка разрешена с обеих сторон
-                
                 if (nextValidLeft) {
-                    // Левая сторона будет разрешена после 00:00 — зелёный бейдж, БЕЗ таймера
                     leftL.classList.add('ok');
-                    leftC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + 
-                                      createCar(1, 0);
+                    leftC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + createCar(1, 0);
                 } else {
-                    // Левую сторону нужно освободить до 00:00 — красный бейдж, С таймером под машинкой
                     leftL.classList.add('warn');
-                    leftC.innerHTML = badge('Переставляем машину до 0:00', 'red') + 
-                                      createCar(1, 0.2) +
-                                      '<div id="left-timer" class="lane-timer urgent">--:--:--</div>';
+                    leftC.innerHTML = badge('Переставляем машину до 0:00', 'red') + createCar(1, 0.2) + '<div id="left-timer" class="lane-timer urgent">--:--:--</div>';
                 }
-
                 if (nextValidRight) {
-                    // Правая сторона будет разрешена после 00:00 — зелёный бейдж, БЕЗ таймера
                     rightL.classList.add('ok');
-                    rightC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + 
-                                       createCar(2, 0);
+                    rightC.innerHTML = badge('Парковка разрешена с 21:00 до следующего дня', 'green') + createCar(2, 0);
                 } else {
-                    // Правую сторону нужно освободить до 00:00 — красный бейдж, С таймером под машинкой
                     rightL.classList.add('warn');
-                    rightC.innerHTML = badge('Переставляем машину до 0:00', 'red') + 
-                                       createCar(2, 0.2) +
-                                       '<div id="right-timer" class="lane-timer urgent">--:--:--</div>';
+                    rightC.innerHTML = badge('Переставляем машину до 0:00', 'red') + createCar(2, 0.2) + '<div id="right-timer" class="lane-timer urgent">--:--:--</div>';
                 }
             } else {
-                // С 00:00 до 21:00: Парковка разрешена только с одной стороны
-                
                 if (currentValidLeft) {
                     leftL.classList.add('ok');
-                    leftC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + 
-                                      createCar(1, 0) +
-                                      '<div id="left-timer" class="lane-timer">--:--:--</div>';
+                    leftC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + createCar(1, 0) + '<div id="left-timer" class="lane-timer">--:--:--</div>';
                 } else {
                     leftL.classList.add('disabled');
                     leftC.innerHTML = badge('Нельзя', 'red');
                 }
-
                 if (currentValidRight) {
                     rightL.classList.add('ok');
-                    rightC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + 
-                                       createCar(2, 0) +
-                                       '<div id="right-timer" class="lane-timer">--:--:--</div>';
+                    rightC.innerHTML = badge('Переставить с 21:00 до 0:00', 'green') + createCar(2, 0) + '<div id="right-timer" class="lane-timer">--:--:--</div>';
                 } else {
                     rightL.classList.add('disabled');
                     rightC.innerHTML = badge('Нельзя', 'red');
@@ -414,12 +1023,8 @@
             const target = new Date(now);
             const isChangeover = now.getHours() >= 21;
             
-            if (isChangeover) {
-                target.setDate(target.getDate() + 1);
-                target.setHours(0, 0, 0, 0);
-            } else {
-                target.setHours(21, 0, 0, 0);
-            }
+            if (isChangeover) { target.setDate(target.getDate() + 1); target.setHours(0, 0, 0, 0); } 
+            else { target.setHours(21, 0, 0, 0); }
             
             let diff = Math.max(0, target - now);
             const h = Math.floor(diff / 3600000) % 24;
@@ -429,7 +1034,6 @@
             
             const leftTimer = document.getElementById('left-timer');
             const rightTimer = document.getElementById('right-timer');
-            
             if (leftTimer) leftTimer.textContent = timeStr;
             if (rightTimer) rightTimer.textContent = timeStr;
         }
@@ -438,7 +1042,6 @@
         function tick() {
             const logic = calculateLogic();
             updateTimerLive();
-            
             const currentState = `${logic.isChangeover}-${logic.currentValidLeft}-${logic.nextValidLeft}`;
             if (lastState !== currentState) {
                 drawRoad(logic);
